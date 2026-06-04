@@ -34,7 +34,7 @@ jobs:
           haxelib install flixel-tools 1.5.1 --quiet
           haxelib install hscript --quiet
           haxelib install SScript --quiet
-          haxelib git linc_luajit https://github.com/jigsaw-4277821/linc_luajit --quiet
+          haxelib git linc_luajit https://github.com/larsiusprime/linc_luajit --quiet
           haxelib install actuate --quiet
           haxelib install hxCodec --quiet
 
