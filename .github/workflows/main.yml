@@ -1,4 +1,3 @@
-
 name: Build
 
 on:
@@ -7,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   buildAndroid:
@@ -37,22 +39,30 @@ jobs:
           haxelib git linc_luajit https://github.com/larsiusprime/linc_luajit --quiet
           haxelib install actuate --quiet
           haxelib install hxCodec --quiet
+          haxelib install newgrounds --quiet
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;21.4.7075529"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529" >> $GITHUB_ENV
 
       - name: Configure Lime
         run: |
           haxelib run lime setup -alias -y
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
-          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_HOME
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_HOME/ndk/21.4.7075529
           haxelib run lime config JAVA_HOME $JAVA_HOME
+          haxelib run lime config HAXEPATH $(which haxe | xargs dirname)
 
       - name: Build Android
-        run: haxelib run lime build android -final
+        run: haxelib run lime build android -final -nosign
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: PsychEngineAndroid
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
